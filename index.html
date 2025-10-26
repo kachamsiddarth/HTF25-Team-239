@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AI Threads - Intelligent Social Platform</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+:root{--bg-primary:#0a0e1a;--bg-secondary:#111827;--glass:rgba(255,255,255,0.05);--glass-border:rgba(255,255,255,0.08);--text-primary:#ffffff;--text-secondary:#9ca3af;--text-muted:#6b7280;--accent-gradient:linear-gradient(135deg,#3b82f6 0%,#8b5cf6 50%,#a855f7 100%)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,var(--bg-primary) 0%,var(--bg-secondary) 100%);color:var(--text-primary);min-height:100vh;overflow-x:hidden}
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(59,130,246,0.2) 0%,transparent 70%);border-radius:50%;top:-200px;right:-200px;animation:float 20s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(50px,50px) scale(1.1)}}
+.hero-content{max-width:1200px;width:100%;text-align:center;position:relative;z-index:1}
+.logo-hero{width:120px;height:120px;border-radius:30px;background:var(--accent-gradient);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:48px;margin:0 auto 2rem;box-shadow:0 30px 80px rgba(59,130,246,0.5);animation:pulse 3s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.hero-title{font-size:4rem;font-weight:800;background:var(--accent-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:1.5rem;line-height:1.2}
+.hero-subtitle{font-size:1.5rem;color:var(--text-secondary);margin-bottom:3rem;max-width:800px;margin-left:auto;margin-right:auto}
+.hero-buttons{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap}
+.btn{padding:1rem 2.5rem;border-radius:14px;border:none;font-weight:700;font-size:1.1rem;cursor:pointer;transition:all 0.3s ease;text-decoration:none;display:inline-flex;align-items:center;gap:0.75rem}
+.btn-primary{background:var(--accent-gradient);color:white;box-shadow:0 8px 30px rgba(59,130,246,0.5)}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(59,130,246,0.6)}
+@media (max-width:768px){.hero-title{font-size:2.5rem}.hero-subtitle{font-size:1.1rem}}
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-content">
+    <div class="logo-hero">AT</div>
+    <h1 class="hero-title">AI-Powered Social Threads</h1>
+    <p class="hero-subtitle">
+      The next generation of intelligent social discussions. Connect with community members, share ideas, and engage in meaningful conversations with AI-powered moderation.
+    </p>
+    <div class="hero-buttons">
+      <a href="auth.html" class="btn btn-primary">Get Started →</a>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

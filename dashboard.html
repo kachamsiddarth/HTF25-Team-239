@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AI Threads</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --card-bg: #1f2937;
+            --card-border: #374151;
+            --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #a855f7 100%);
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: var(--bg-secondary);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-logout {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-logout:hover {
+            background: #dc2626;
+        }
+
+        .btn-profile {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-profile:hover {
+            opacity: 0.9;
+        }
+
+        .btn-post {
+            background: var(--accent-gradient);
+            color: white;
+        }
+
+        .btn-post:hover {
+            opacity: 0.9;
+        }
+
+        main {
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        #postsSection {
+            min-width: 300px;
+        }
+
+        .post-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .post-author {
+            font-weight: 700;
+        }
+
+        .post-time {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .post-body {
+            margin: 0.5rem 0;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 0.5rem;
+        }
+
+        .small-btn {
+            cursor: pointer;
+            background: #374151;
+            border: none;
+            padding: 0.3rem 0.6rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .small-btn:hover {
+            background: #4b5563;
+        }
+
+        textarea.form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 12px;
+            border: 1px solid #4b5563;
+            background: #1f2937;
+            color: white;
+            font-size: 1rem;
+            resize: none;
+        }
+
+        .reply-section {
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .reply-section.active {
+            display: block;
+        }
+
+        #postsSection h2 {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>AI Threads Dashboard</h1>
+        <div class="header-actions">
+            <button class="btn btn-profile" id="profileBtn">Profile</button>
+            <button class="btn btn-logout" id="logoutBtn">Logout</button>
+        </div>
+    </header>
+
+    <main>
+        <section id="postsSection">
+            <h2>What's on your mind?</h2>
+            <textarea id="postText" class="form-input" placeholder="Share something with the community..."></textarea>
+            <button class="btn btn-post" id="postBtn">Post</button>
+            <div id="postsList"></div>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let currentUser = localStorage.getItem('currentUser');
+            if (!currentUser) { window.location.href = 'auth.html'; return; }
+
+            const postsContainer = document.getElementById('postsList');
+            const postTextEl = document.getElementById('postText');
+            const postBtn = document.getElementById('postBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const profileBtn = document.getElementById('profileBtn');
+
+            let posts = JSON.parse(localStorage.getItem('posts') || '[]');
+            const bannedWords = [
+                "2g1c",
+                "2 girls 1 cup",
+                "acrotomophilia",
+                "alabama hot pocket",
+                "alaskan pipeline",
+                "anal",
+                "anilingus",
+                "anus",
+                "apeshit",
+                "arsehole",
+                "ass",
+                "asshole",
+                "assmunch",
+                "auto erotic",
+                "autoerotic",
+                "babeland",
+                "baby batter",
+                "baby juice",
+                "ball gag",
+                "ball gravy",
+                "ball kicking",
+                "ball licking",
+                "ball sack",
+                "ball sucking",
+                "bangbros",
+                "bangbus",
+                "bareback",
+                "barely legal",
+                "barenaked",
+                "bastard",
+                "bastardo",
+                "bastinado",
+                "bbw",
+                "bdsm",
+                "beaner",
+                "beaners",
+                "beaver cleaver",
+                "beaver lips",
+                "beastiality",
+                "bestiality",
+                "big black",
+                "big breasts",
+                "big knockers",
+                "big tits",
+                "bimbos",
+                "birdlock",
+                "bitch",
+                "bitches",
+                "black cock",
+                "blonde action",
+                "blonde on blonde action",
+                "blowjob",
+                "blow job",
+                "blow your load",
+                "blue waffle",
+                "blumpkin",
+                "bollocks",
+                "bondage",
+                "boner",
+                "boob",
+                "boobs",
+                "booty call",
+                "brown showers",
+                "brunette action",
+                "bukkake",
+                "bulldyke",
+                "bullet vibe",
+                "bullshit",
+                "bung hole",
+                "bunghole",
+                "busty",
+                "butt",
+                "buttcheeks",
+                "butthole",
+                "camel toe",
+                "camgirl",
+                "camslut",
+                "camwhore",
+                "carpet muncher",
+                "carpetmuncher",
+                "chocolate rosebuds",
+                "cialis",
+                "circlejerk",
+                "cleveland steamer",
+                "clit",
+                "clitoris",
+                "clover clamps",
+                "clusterfuck",
+                "cock",
+                "cocks",
+                "coprolagnia",
+                "coprophilia",
+                "cornhole",
+                "coon",
+                "coons",
+                "creampie",
+                "cum",
+                "cumming",
+                "cumshot",
+                "cumshots",
+                "cunnilingus",
+                "cunt",
+                "darkie",
+                "date rape",
+                "daterape",
+                "deep throat",
+                "deepthroat",
+                "dendrophilia",
+                "dick",
+                "dildo",
+                "dingleberry",
+                "dingleberries",
+                "dirty pillows",
+                "dirty sanchez",
+                "doggie style",
+                "doggiestyle",
+                "doggy style",
+                "doggystyle",
+                "dog style",
+                "dolcett",
+                "domination",
+                "dominatrix",
+                "dommes",
+                "donkey punch",
+                "double dong",
+                "double penetration",
+                "dp action",
+                "dry hump",
+                "dvda",
+                "eat my ass",
+                "ecchi",
+                "ejaculation",
+                "erotic",
+                "erotism",
+                "escort",
+                "eunuch",
+                "fag",
+                "faggot",
+                "fecal",
+                "felch",
+                "fellatio",
+                "feltch",
+                "female squirting",
+                "femdom",
+                "figging",
+                "fingerbang",
+                "fingering",
+                "fisting",
+                "foot fetish",
+                "footjob",
+                "frotting",
+                "fuck",
+                "fuck buttons",
+                "fuckin",
+                "fucking",
+                "fucktards",
+                "fudge packer",
+                "fudgepacker",
+                "futanari",
+                "gangbang",
+                "gang bang",
+                "gay sex",
+                "genitals",
+                "giant cock",
+                "girl on",
+                "girl on top",
+                "girls gone wild",
+                "goatcx",
+                "goatse",
+                "god damn",
+                "gokkun",
+                "golden shower",
+                "goodpoop",
+                "goo girl",
+                "goregasm",
+                "grope",
+                "group sex",
+                "g-spot",
+                "guro",
+                "hand job",
+                "handjob",
+                "hard core",
+                "hardcore",
+                "hentai",
+                "homoerotic",
+                "honkey",
+                "hooker",
+                "horny",
+                "hot carl",
+                "hot chick",
+                "how to kill",
+                "how to murder",
+                "huge fat",
+                "humping",
+                "incest",
+                "intercourse",
+                "jack off",
+                "jail bait",
+                "jailbait",
+                "jelly donut",
+                "jerk off",
+                "jigaboo",
+                "jiggaboo",
+                "jiggerboo",
+                "jizz",
+                "juggs",
+                "kike",
+                "kinbaku",
+                "kinkster",
+                "kinky",
+                "knobbing",
+                "leather restraint",
+                "leather straight jacket",
+                "lemon party",
+                "livesex",
+                "lolita",
+                "lovemaking",
+                "make me come",
+                "male squirting",
+                "masturbate",
+                "masturbating",
+                "masturbation",
+                "menage a trois",
+                "milf",
+                "missionary position",
+                "mong",
+                "motherfucker",
+                "mound of venus",
+                "mr hands",
+                "muff diver",
+                "muffdiving",
+                "nambla",
+                "nawashi",
+                "negro",
+                "neonazi",
+                "nigga",
+                "nigger",
+                "nig nog",
+                "nimphomania",
+                "nipple",
+                "nipples",
+                "nsfw",
+                "nsfw images",
+                "nude",
+                "nudity",
+                "nutten",
+                "nympho",
+                "nymphomania",
+                "octopussy",
+                "omorashi",
+                "one cup two girls",
+                "one guy one jar",
+                "orgasm",
+                "orgy",
+                "paedophile",
+                "paki",
+                "panties",
+                "panty",
+                "pedobear",
+                "pedophile",
+                "pegging",
+                "penis",
+                "phone sex",
+                "piece of shit",
+                "pikey",
+                "pissing",
+                "piss pig",
+                "pisspig",
+                "playboy",
+                "pleasure chest",
+                "pole smoker",
+                "ponyplay",
+                "poof",
+                "poon",
+                "poontang",
+                "punany",
+                "poop chute",
+                "poopchute",
+                "porn",
+                "porno",
+                "pornography",
+                "prince albert piercing",
+                "pthc",
+                "pubes",
+                "pussy",
+                "queaf",
+                "queef",
+                "quim",
+                "raghead",
+                "raging boner",
+                "rape",
+                "raping",
+                "rapist",
+                "rectum",
+                "reverse cowgirl",
+                "rimjob",
+                "rimming",
+                "rosy palm",
+                "rosy palm and her 5 sisters",
+                "rusty trombone",
+                "sadism",
+                "santorum",
+                "scat",
+                "schlong",
+                "scissoring",
+                "semen",
+                "sex",
+                "sexcam",
+                "sexo",
+                "sexy",
+                "sexual",
+                "sexually",
+                "sexuality",
+                "shaved beaver",
+                "shaved pussy",
+                "shemale",
+                "shibari",
+                "shit",
+                "shitblimp",
+                "shitty",
+                "shota",
+                "shrimping",
+                "skeet",
+                "slanteye",
+                "slut",
+                "s&m",
+                "smut",
+                "snatch",
+                "snowballing",
+                "sodomize",
+                "sodomy",
+                "spastic",
+                "spic",
+                "splooge",
+                "splooge moose",
+                "spooge",
+                "spread legs",
+                "spunk",
+                "strap on",
+                "strapon",
+                "strappado",
+                "strip club",
+                "style doggy",
+                "suck",
+                "sucks",
+                "suicide girls",
+                "sultry women",
+                "swastika",
+                "swinger",
+                "tainted love",
+                "taste my",
+                "tea bagging",
+                "threesome",
+                "throating",
+                "thumbzilla",
+                "tied up",
+                "tight white",
+                "tit",
+                "tits",
+                "titties",
+                "titty",
+                "tongue in a",
+                "topless",
+                "tosser",
+                "towelhead",
+                "tranny",
+                "tribadism",
+                "tub girl",
+                "tubgirl",
+                "tushy",
+                "twat",
+                "twink",
+                "twinkie",
+                "two girls one cup",
+                "undressing",
+                "upskirt",
+                "urethra play",
+                "urophilia",
+                "vagina",
+                "venus mound",
+                "viagra",
+                "vibrator",
+                "violet wand",
+                "vorarephilia",
+                "voyeur",
+                "voyeurweb",
+                "voyuer",
+                "vulva",
+                "wank",
+                "wetback",
+                "wet dream",
+                "white power",
+                "whore",
+                "worldsex",
+                "wrapping men",
+                "wrinkled starfish",
+                "xx",
+                "xxx",
+                "yaoi",
+                "yellow showers",
+                "yiffy",
+                "zoophilia",
+                "🖕"
+            ];
+
+            function escapeHtml(s) { return s ? String(s).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;') : ""; }
+            function savePosts() { localStorage.setItem('posts', JSON.stringify(posts)); }
+
+            function renderPosts() {
+                postsContainer.innerHTML = '';
+                if (posts.length === 0) { postsContainer.innerHTML = '<div style="color:var(--text-muted);padding:10px;">No posts yet!</div>'; return; }
+                posts.slice().reverse().forEach(post => {
+                    const isOwner = post.user === currentUser;
+                    const div = document.createElement('div');
+                    div.className = 'post-card';
+                    div.innerHTML = `
+        <div class="post-header">
+          <div class="post-author">${escapeHtml(post.user)}</div>
+          <div class="post-time">${new Date(post.createdAt).toLocaleString()}</div>
+        </div>
+        <div class="post-body">${escapeHtml(post.content)}</div>
+        <div class="post-actions">
+          <button class="small-btn" data-id="${post.id}" data-action="like">❤️ ${post.likes ? post.likes.length : 0}</button>
+          <button class="small-btn" data-id="${post.id}" data-action="reply">💬 Reply</button>
+          ${isOwner ? `<button class="small-btn" data-id="${post.id}" data-action="edit">✏️ Edit</button>
+          <button class="small-btn" data-id="${post.id}" data-action="delete">🗑️ Delete</button>` : ''}
+        </div>
+        <div class="reply-section" id="reply-${post.id}">
+          <input type="text" placeholder="Write a reply..." class="form-input" id="replyInput-${post.id}" style="margin-top:0.5rem;">
+          <button class="small-btn" data-id="${post.id}" data-action="addReply">Send</button>
+          <div id="repliesList-${post.id}" style="margin-top:0.5rem;"></div>
+        </div>
+      `;
+                    postsContainer.appendChild(div);
+                    renderReplies(post);
+                });
+            }
+
+            function renderReplies(post) {
+                const container = document.getElementById(`repliesList-${post.id}`);
+                if (!container) return;
+                container.innerHTML = '';
+                (post.replies || []).forEach(r => {
+                    const div = document.createElement('div');
+                    div.style.marginTop = '4px';
+                    div.innerHTML = `<strong>${escapeHtml(r.user)}</strong>: ${escapeHtml(r.text)}`;
+                    container.appendChild(div);
+                });
+            }
+
+            postsContainer.addEventListener('click', ev => {
+                const btn = ev.target.closest('button'); if (!btn) return;
+                const id = btn.dataset.id; const action = btn.dataset.action;
+                const post = posts.find(p => p.id === id); if (!post) return;
+
+                if (action === 'delete') { posts = posts.filter(p => p.id !== id); savePosts(); renderPosts(); }
+                else if (action === 'edit') { const text = prompt('Edit post:', post.content); if (text) { post.content = text; savePosts(); renderPosts(); } }
+                else if (action === 'like') { post.likes = post.likes || []; const idx = post.likes.indexOf(currentUser); if (idx === -1) post.likes.push(currentUser); else post.likes.splice(idx, 1); savePosts(); renderPosts(); }
+                else if (action === 'reply') { document.getElementById(`reply-${id}`).classList.toggle('active'); }
+                else if (action === 'addReply') { const input = document.getElementById(`replyInput-${id}`); const text = input.value.trim(); if (text) { post.replies = post.replies || []; post.replies.push({ user: currentUser, text }); input.value = ''; savePosts(); renderPosts(); } }
+            });
+
+            postBtn.addEventListener('click', () => {
+                const content = postTextEl.value.trim();
+                if (!content) { alert('Enter a message'); return; }
+                const contentWords = content.toLowerCase().match(/\b\w+\b/g) || [];
+                if (contentWords.some(word => bannedWords.includes(word))) {
+                    alert('Inappropriate content');
+                    return;
+                }
+
+                posts.push({ id: Date.now() + '_' + Math.floor(Math.random() * 1000), user: currentUser, content, createdAt: new Date().toISOString(), likes: [], replies: [] });
+                postTextEl.value = ''; savePosts(); renderPosts();
+            });
+
+            logoutBtn.addEventListener('click', () => { localStorage.removeItem('currentUser'); window.location.href = 'auth.html'; });
+            profileBtn.addEventListener('click', () => { window.location.href = 'profile.html'; });
+
+            renderPosts();
+        });
+    </script>
+
+</body>
+
+</html>

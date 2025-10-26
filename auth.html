@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Login & Register - AI Threads</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+:root{--bg-primary:#0a0e1a;--bg-secondary:#111827;--glass:rgba(255,255,255,0.05);--glass-border:rgba(255,255,255,0.1);--text-primary:#ffffff;--text-secondary:#9ca3af;--text-muted:#6b7280;--accent-gradient:linear-gradient(135deg,#3b82f6 0%,#8b5cf6 50%,#a855f7 100%)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:linear-gradient(180deg,var(--bg-primary) 0%,var(--bg-secondary) 100%);color:var(--text-primary);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
+.auth-container{max-width:1100px;width:100%;display:flex;gap:3rem;align-items:stretch}
+.auth-card{flex:1;background:linear-gradient(135deg,var(--glass) 0%,rgba(255,255,255,0.02) 100%);border:1px solid var(--glass-border);border-radius:24px;padding:3rem;backdrop-filter:blur(20px);box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+.logo{width:70px;height:70px;border-radius:18px;background:var(--accent-gradient);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:32px;margin-bottom:2rem;box-shadow:0 15px 40px rgba(59,130,246,0.4)}
+.card-title{font-size:2rem;font-weight:800;background:var(--accent-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:1rem}
+.card-subtitle{color:var(--text-secondary);margin-bottom:2.5rem;font-size:1.05rem}
+.form-toggle{display:flex;gap:0.5rem;background:rgba(0,0,0,0.3);padding:0.5rem;border-radius:12px;margin-bottom:2rem}
+.toggle-btn{flex:1;padding:0.875rem;border:none;background:transparent;color:var(--text-secondary);font-weight:600;border-radius:8px;cursor:pointer;transition:all 0.3s ease}
+.toggle-btn.active{background:var(--accent-gradient);color:white;box-shadow:0 4px 14px rgba(59,130,246,0.4)}
+.form{display:none}
+.form.active{display:block;animation:fadeIn 0.4s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.form-group{margin-bottom:1.5rem}
+.form-label{display:block;font-size:0.875rem;font-weight:600;color:var(--text-secondary);margin-bottom:0.5rem}
+.form-input{width:100%;padding:0.875rem 1rem;background:rgba(0,0,0,0.3);border:1px solid var(--glass-border);border-radius:12px;color:var(--text-primary);font-size:0.95rem;font-family:inherit;transition:all 0.3s ease}
+.form-input:focus{outline:none;border-color:#3b82f6;background:rgba(0,0,0,0.4);box-shadow:0 0 0 3px rgba(59,130,246,0.1)}
+textarea.form-input{min-height:100px;resize:vertical}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.input-wrapper{position:relative}
+.password-toggle{position:absolute;right:1rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.875rem;font-weight:600}
+.password-toggle:hover{color:#3b82f6}
+.submit-btn{width:100%;padding:1rem;background:var(--accent-gradient);border:none;border-radius:12px;color:white;font-weight:700;font-size:1rem;cursor:pointer;transition:all 0.3s ease;box-shadow:0 8px 24px rgba(59,130,246,0.4)}
+.error { color: #ffb4b4; margin-top:8px; font-size:0.95rem; display:none }
+</style>
+</head>
+<body>
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="back-link"><a href="index.html">← Back to Home</a></div>
+    <div class="logo">AT</div>
+    <h1 class="card-title">Welcome</h1>
+    <p class="card-subtitle">Sign in or create an account to continue</p>
+
+    <div class="form-toggle">
+      <button class="toggle-btn active" id="loginToggle">Login</button>
+      <button class="toggle-btn" id="signupToggle">Sign Up</button>
+    </div>
+
+    <div class="form active" id="loginForm">
+      <form id="formLogin">
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input type="text" class="form-input" id="loginUsername" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="input-wrapper">
+            <input type="password" class="form-input" id="loginPassword" required>
+            <button type="button" class="password-toggle" onclick="togglePassword('loginPassword', this)">Show</button>
+          </div>
+        </div>
+        <div class="error" id="loginError"></div>
+        <button type="submit" class="submit-btn">Sign In</button>
+      </form>
+    </div>
+
+    <div class="form" id="signupForm">
+      <form id="formSignup">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Username</label>
+            <input type="text" class="form-input" id="signupUsername" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Avatar URL</label>
+            <input type="url" class="form-input" id="signupAvatar" placeholder="https://...">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="input-wrapper">
+              <input type="password" class="form-input" id="signupPassword" required>
+              <button type="button" class="password-toggle" onclick="togglePassword('signupPassword', this)">Show</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirm</label>
+            <div class="input-wrapper">
+              <input type="password" class="form-input" id="signupConfirm" required>
+              <button type="button" class="password-toggle" onclick="togglePassword('signupConfirm', this)">Show</button>
+            </div>
+          </div>
+        </div>
+        <div class="error" id="signupError"></div>
+        <button type="submit" class="submit-btn">Create Account</button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function switchTo(type){
+  document.getElementById("loginForm").classList.toggle("active", type==="login");
+  document.getElementById("signupForm").classList.toggle("active", type==="signup");
+  document.getElementById("loginToggle").classList.toggle("active", type==="login");
+  document.getElementById("signupToggle").classList.toggle("active", type==="signup");
+}
+document.getElementById("loginToggle").onclick = ()=>switchTo("login");
+document.getElementById("signupToggle").onclick = ()=>switchTo("signup");
+
+function togglePassword(id, btn){
+  const el=document.getElementById(id);
+  el.type=el.type==="password"?"text":"password";
+  btn.textContent=el.type==="password"?"Show":"Hide";
+}
+
+function getUsers() { return JSON.parse(localStorage.getItem("users") || "[]"); }
+function saveUsers(users){ localStorage.setItem("users", JSON.stringify(users)); }
+
+const bannedWords = ["hell","idiot","stupid","kill","bitch"];
+
+document.getElementById("formSignup").addEventListener("submit", e => {
+  e.preventDefault();
+  const username = signupUsername.value.trim();
+  const password = signupPassword.value;
+  const confirm = signupConfirm.value;
+  const avatar = signupAvatar.value.trim();
+
+  if(bannedWords.some(w => username.toLowerCase().includes(w))){
+    signupError.textContent = "Username not allowed";
+    signupError.style.display = "block";
+    return;
+  }
+  if(password!==confirm){
+    signupError.textContent="Passwords do not match";
+    signupError.style.display="block";
+    return;
+  }
+
+  const users=getUsers();
+  if(users.some(u=>u.username===username)){
+    signupError.textContent="Username already exists";
+    signupError.style.display="block";
+    return;
+  }
+
+  users.push({ username, password:btoa(password), avatar, bio:"", createdAt: new Date().toISOString() });
+  saveUsers(users);
+  localStorage.setItem("currentUser", username);
+  window.location.href="dashboard.html";
+});
+
+document.getElementById("formLogin").addEventListener("submit", e=>{
+  e.preventDefault();
+  const username = loginUsername.value.trim();
+  const password = loginPassword.value;
+  const users = getUsers();
+  const user = users.find(u=>u.username===username && u.password===btoa(password));
+  if(!user){
+    loginError.textContent="Invalid username or password";
+    loginError.style.display="block";
+    return;
+  }
+  localStorage.setItem("currentUser", username);
+  window.location.href="dashboard.html";
+});
+</script>
+</body>
+</html>
